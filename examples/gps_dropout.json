@@ -1,0 +1,5 @@
+{
+  "mode": "target",
+  "gps_dropout_start_s": 20,
+  "gps_dropout_end_s": 26
+}

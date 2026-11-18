@@ -1,0 +1,493 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>TUSI · Recovery Lab</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <header>
+      <div class="brand">T<span>∕</span>USI <small>RECOVERY LAB</small></div>
+      <span class="badge">SIMULATION · 미보정 모델</span>
+    </header>
+    <main>
+      <section class="intro">
+        <div>
+          <p class="eyebrow">MOTOR → LINE → CANOPY → FLIGHT</p>
+          <h1>발사부터 착지까지, 하나의 미션.</h1>
+          <p>
+            점화·상승 → 최고점 → 전개·안정화 → GPS 기반 PD 조향 → 착지. 전체
+            시나리오를 재생하고 각 단계를 살펴보세요.
+          </p>
+        </div>
+        <div class="source-stats" id="source-stats">입력 파일 읽는 중…</div>
+      </section>
+      <div class="notice">
+        <strong>회로도 확인</strong> 서보 전원은 UBEC 출력 6.5 V/10 A로 표시돼
+        있습니다. 확보한 ST3235 토크·속도 자료는 12 V 기준이므로, 현재 결과는 12
+        V 성능 참조 계산입니다. 6.5 V에서의 성능과 드럼·줄·공력은 아직 보정되지
+        않았습니다.
+      </div>
+      <div class="presets" aria-label="실험 선택">
+        <span>바로 실험하기</span
+        ><button data-preset="target">01 기본 미션</button
+        ><button data-preset="gust">02 돌풍 속 추종</button
+        ><button data-preset="dropout">03 GPS 끊김</button
+        ><button data-preset="manual">04 줄 단계 시험</button>
+        <p>계산 후 자동 재생 · 마우스로 회전 / 휠로 확대</p>
+      </div>
+      <div class="workspace">
+        <aside>
+          <form id="controls">
+            <div class="runbar">
+              <button id="run" type="submit">
+                전체 미션 계산·재생 <span>↗</span>
+              </button>
+              <p id="status" role="status">준비 중…</p>
+            </div>
+            <h2>01 <span>비행 조건</span></h2>
+            <label
+              >시작 비행 데이터<select name="initialization">
+                <option value="ork">ORK 저장 상승 궤적 사용</option>
+                <option value="measured">실측 추력 · 근사 상승 계산</option>
+                <option value="theoretical">이론 추력 · 근사 상승 계산</option>
+              </select></label
+            >
+            <label
+              >조향 방식<select name="mode">
+                <option value="target">GPS 목표 지점 추종 · 센서 PD</option>
+                <option value="manual">회전각 입력 · 일정 시간 당김</option>
+                <option value="neutral">무조향 · 기준 비행</option>
+                <option value="heading">
+                  고정 방위 유지 · 이상적 센서 비교
+                </option>
+              </select></label
+            >
+            <div class="fields" id="flight-fields"></div>
+            <h2>02 <span>목표 추종 PD</span></h2>
+            <div class="fields" id="guidance-fields"></div>
+            <p class="caption">
+              목표 좌표는 발사점 기준 m. Kp는 방위 오차, Kd는 측정 선회율에
+              적용합니다. 고도에 따른 최종 접근·플레어는 아직 없습니다.
+            </p>
+            <details>
+              <summary>바람과 가상 센서 설정</summary>
+              <p class="caption">
+                설치 센서의 실측 사양이 아닌 시험용 가정값입니다. 방위는 자세
+                추정기의 출력으로 가정합니다.
+              </p>
+              <div class="fields" id="sensor-fields"></div>
+            </details>
+            <h2>03 <span>모터와 줄</span></h2>
+            <p class="caption" id="servo-reference"></p>
+            <p class="caption">
+              권취 제한 270°와 드럼 지름 20 mm는 기구 가정값입니다. 정지 토크는
+              연속 운전 토크가 아닙니다. 아래 토크·속도를 변경하면 제조사
+              기본값을 덮어씁니다.
+            </p>
+            <div class="fields" id="motor-fields"></div>
+            <h2>04 <span>낙하산 모델</span></h2>
+            <label
+              >실제 줄 연결 방식<select name="rigging">
+                <option value="unknown">미확정 · 조향 검증 전</option>
+                <option value="two_line">제품의 좌우 조종줄 2개</option>
+                <option value="brake_lines">별도 후연 브레이크 줄</option>
+              </select></label
+            >
+            <p class="caption">
+              연결 방식 표시는 이력으로 남습니다. 선택만으로 공력·하중 계수가
+              보정되지는 않습니다. 두 조종줄이 전체 하중을 받으면 하중 비율 1
+              시나리오도 비교하세요.
+            </p>
+            <div class="fields" id="canopy-fields"></div>
+            <details>
+              <summary>상세 모델 설정 <span>미측정값 포함</span></summary>
+              <div class="fields" id="advanced-fields"></div>
+            </details>
+          </form>
+        </aside>
+        <section class="results">
+          <p class="notice" id="voltage-status" role="status">
+            전압 조건 확인 중…
+          </p>
+          <p class="notice" id="physics-status">물리 모델 근거 확인 중…</p>
+          <div class="metrics">
+            <div>
+              <span>유효 줄 당김 · 좌 / 우</span
+              ><strong id="metric-pull">—</strong>
+            </div>
+            <div>
+              <span>최대 선회율</span><strong id="metric-turn">—</strong>
+            </div>
+            <div>
+              <span id="endpoint-label">무조향 대비 착지점 차이</span
+              ><strong id="metric-distance">—</strong>
+            </div>
+          </div>
+          <div class="panel mission-panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">LAUNCH → RECOVERY · SIMULATED MISSION</p>
+                <h2 id="mission-phase">미션 준비</h2>
+              </div>
+              <button type="button" id="mission-restart">처음부터 재생</button>
+            </div>
+            <p id="mission-detail"></p>
+            <div
+              id="mission-events"
+              class="mission-events"
+              aria-label="미션 단계로 이동"
+            ></div>
+            <p class="caption">
+              단계를 누르면 해당 시점으로 이동합니다. 준비 완료를 가정한 시험
+              시나리오이며 실제 펌웨어 FSM·점화·사출 장치와 연결되지 않습니다.
+            </p>
+          </div>
+          <div class="panel scene-panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">CONTINUOUS SENSOR FEEDBACK</p>
+                <h2>3D 전체 비행</h2>
+              </div>
+              <div class="camera-buttons">
+                <button type="button" id="camera-follow" aria-pressed="true">
+                  기체 따라가기</button
+                ><button type="button" id="camera-rocket" aria-pressed="false">
+                  로켓 확대</button
+                ><button type="button" id="camera-launch" aria-pressed="false">
+                  상승 궤적</button
+                ><button
+                  type="button"
+                  id="camera-overview"
+                  aria-pressed="false"
+                >
+                  전체 경로
+                </button>
+              </div>
+            </div>
+            <div class="scene-wrap">
+              <div
+                id="scene"
+                aria-label="실제 계산된 방위와 뱅크각, 줄 당김을 표시하는 3D 파라포일"
+              ></div>
+              <div class="scene-hud">
+                <span id="scene-time">T + 0.0 s</span
+                ><span id="scene-alt">ALT — m</span
+                ><span id="scene-phase">발사대 대기</span
+                ><span id="scene-attitude">기울기 확인 중</span
+                ><span id="scene-mode"
+                  >따라가기 · ORK 로켓 / 제품 참고 캐노피</span
+                >
+              </div>
+              <div class="scene-legend">
+                <span>● 좌측 줄</span><span>● 우측 줄</span><span>↗ 바람</span
+                ><span>↗ 지령 방위</span>
+              </div>
+              <div class="scene-pull" id="scene-pull">L 0.0 mm · R 0.0 mm</div>
+            </div>
+            <div class="mission-options">
+              <label
+                >재생 범위<select id="view-scope">
+                  <option value="mission">발사부터 착지까지</option>
+                  <option value="recovery">회수 구간만</option>
+                </select></label
+              ><label class="loop-label"
+                ><input type="checkbox" id="phase-speed" checked />
+                발사·전개·착지는 1×로 보기</label
+              >
+            </div>
+            <div class="playback">
+              <button id="play" type="button" aria-label="비행 재생">
+                ▶ 재생</button
+              ><input
+                id="scrub"
+                aria-label="비행 시간"
+                type="range"
+                min="0"
+                max="1"
+                value="0"
+                step="1"
+              /><output id="clock">0.0 s</output
+              ><select id="speed" aria-label="재생 속도">
+                <option value="1">1×</option>
+                <option value="5" selected>5×</option>
+                <option value="10">10×</option></select
+              ><label class="loop-label"
+                ><input id="loop" type="checkbox" checked /> 반복</label
+              >
+            </div>
+            <p class="caption">
+              줄 당김·드럼 회전·선회 자세는 계산값과 연결됩니다. 캐노피 변형은
+              보기 위한 6배 강조이며 유체·천 해석 결과가 아닙니다. 전체 경로의
+              기체는 8배 확대합니다.
+            </p>
+            <p class="caption" id="geometry-caption"></p>
+            <p class="caption" id="track-caption"></p>
+            <details class="visual-sources">
+              <summary>3D 외형의 원본과 치수 보기</summary>
+              <div class="reference-row">
+                <a href="/reference/parafoil.jpg" target="_blank"
+                  ><img
+                    src="/reference/parafoil.jpg"
+                    alt="동일 제품명 빨간색 파라포일의 Amazon 호스팅 참고 사진"
+                    loading="lazy"
+                /></a>
+                <div>
+                  <p id="geometry-details"></p>
+                  <p>
+                    캐노피는 제품 참고 사진의 빨강·검정·밝은색 패널, 공기
+                    주입구와 2줄로 모이는 브라이들을 재현합니다. 표시 폭 2.5 m와
+                    시위 0.85 m는 제품명·판매 자료 기준이며 실측 형상은
+                    아닙니다. 공력 계산 면적과는 별개입니다.
+                  </p>
+                  <p>
+                    사진은
+                    <a
+                      href="https://www.nellisauction.com/p/HENGDA-KITE-2-5m-Dual-Line-Stunt-Parafoil-Kites-Soft-Stunt-Kite/68238117"
+                      target="_blank"
+                      rel="noreferrer"
+                      >같은 제품명·색상 판매 페이지</a
+                    >가 제공하는 Amazon 원본입니다. 사용자 링크의 현재 옵션과
+                    브라이들 치수는 미확정입니다. 로켓 색상, 서보 장착·줄 연결,
+                    전개 후 분리 자세는 개념 표현입니다.
+                  </p>
+                </div>
+              </div>
+            </details>
+          </div>
+          <div class="panel feedback-panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">GPS → GUIDANCE → PD → ACTUATOR</p>
+                <h2>계속 반복되는 제어</h2>
+              </div>
+              <span id="feedback-status" class="badge">센서 대기</span>
+            </div>
+            <div class="feedback-grid">
+              <div>
+                <small>01 GPS · 현재 위치</small
+                ><strong id="feedback-gps">—</strong>
+                <p id="feedback-age">—</p>
+              </div>
+              <div>
+                <small>02 목표와 비교</small
+                ><strong id="feedback-error">—</strong>
+                <p id="feedback-range">—</p>
+              </div>
+              <div>
+                <small>03 PD · 선회 지령</small
+                ><strong id="feedback-pd">—</strong>
+                <p id="feedback-terms">—</p>
+              </div>
+              <div>
+                <small>04 줄 당김 · 좌 / 우</small
+                ><strong id="feedback-brake">—</strong>
+                <p id="feedback-request">—</p>
+              </div>
+            </div>
+            <p id="comparison" class="caption"></p>
+          </div>
+          <div class="panel trajectory-panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">GROUND TRACK · SAME WIND SEED</p>
+                <h2>목표와 실제 경로</h2>
+              </div>
+              <div class="legend">
+                <span class="active-line">현재 제어</span
+                ><span class="neutral-line">무조향</span>
+              </div>
+            </div>
+            <canvas
+              id="trajectory"
+              role="img"
+              aria-label="동쪽·북쪽 좌표계에서 목표, GPS 및 실제 경로 비교"
+            ></canvas>
+            <p class="caption">
+              황색 원: 목표 반경 · 보라색 점: 최신 GPS 위치 · 옅은 선: 전체 계산
+              경로 · 밝은 선: 재생 시점까지의 경로
+            </p>
+          </div>
+          <div class="split">
+            <div class="panel">
+              <div class="panel-head">
+                <div>
+                  <p class="eyebrow">ACTUATOR RESPONSE</p>
+                  <h2>모터 회전과 줄 당김</h2>
+                </div>
+              </div>
+              <canvas
+                id="mechanism"
+                role="img"
+                aria-label="좌우 드럼 회전과 유효 줄 당김 개념도"
+              ></canvas>
+              <p class="caption">
+                기구 개념도 · 선 길이와 캐노피 모양은 실물 축척이 아닙니다.
+              </p>
+            </div>
+            <div class="panel">
+              <div class="panel-head">
+                <div>
+                  <p class="eyebrow">FLIGHT STATE</p>
+                  <h2>현재 비행 상태</h2>
+                </div>
+              </div>
+              <dl id="state"></dl>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">TIME HISTORY</p>
+                <h2>줄 당김과 선회 응답</h2>
+              </div>
+              <label class="inline"
+                >표시<select id="plot-kind">
+                  <option value="tilt">기체 기울기 (°)</option>
+                  <option value="rates">ORK 각속도 (°/s)</option>
+                  <option value="motor">모터 지령·응답 (°)</option>
+                  <option value="brake" selected>줄 당김 (mm)</option>
+                  <option value="error">방위 오차 (°)</option>
+                  <option value="distance">목표 거리 (m)</option>
+                  <option value="wind">실제 / 추정 바람 (m/s)</option>
+                  <option value="yaw">선회율 (°/s)</option>
+                  <option value="altitude">고도 (m)</option>
+                  <option value="torque">요구 토크 (N·m)</option>
+                </select></label
+              ><label class="inline"
+                >시간 범위<select id="plot-window">
+                  <option value="0">전체</option>
+                  <option value="2">현재 주변 2초</option>
+                  <option value="10">현재 주변 10초</option>
+                </select></label
+              >
+            </div>
+            <canvas
+              id="history"
+              role="img"
+              aria-label="시간에 따른 줄 당김 또는 선회율 그래프"
+            ></canvas>
+            <p class="caption">
+              고도·기울기는 전체 비행, ORK 각속도는 저장된 상승 구간을
+              표시합니다. 센서·조향 곡선은 회수 시작 이후입니다. 모터 응답은
+              시간 범위를 2초로 좁히고 재생 슬라이더를 움직여 확인하세요.
+            </p>
+          </div>
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">LINE TRAVEL → DISPLACEMENT</p>
+                <h2>얼마나 당기면, 얼마나 이동할까?</h2>
+              </div>
+              <button type="button" id="sweep">회전각별 비교 계산</button>
+            </div>
+            <p class="caption">
+              현재 설정에서 좌측은 중립, 우측은 0~270°로 바꿔 30초씩 계산합니다.
+              회수 시작 R=0 기준의 수동 당김 시작·종료 시간을 사용하며, 같은
+              바람 시드의 무조향과 종료 위치를 비교합니다. 모두 30초에 도달한
+              행끼리 같은 시각의 차이로 읽으세요.
+            </p>
+            <p id="sweep-status" role="status"></p>
+            <div id="sweep-table" class="table-scroll"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">ASSUMPTIONS → CONTROL AUTHORITY</p>
+                <h2>이 캐노피가 실제로 조향될까?</h2>
+              </div>
+              <button type="button" id="sensitivity">가정 8가지 비교</button>
+            </div>
+            <p>
+              제품 사진만으로 자유비행 안정성·당김별 선회율을 검증할 수
+              없습니다. 2줄 연과 별도 브레이크 낙하산은 같은 조작량에 같은
+              반응을 낸다고 가정할 수 없습니다. 선회 효과 감소·없음·반전, 모터
+              성능 감소, 지연, 전체 줄 하중, 센서 오차를 비교합니다.
+            </p>
+            <p class="caption">
+              이 비교는 성공 확률이 아닙니다. 모터 성능 50%도 6.5V 환산값이 아닌
+              시험 가정입니다. 최대 유효 당김을 넘으면 보정 범위 밖으로
+              표시합니다.
+            </p>
+            <p id="sensitivity-status" role="status"></p>
+            <div id="sensitivity-table" class="table-scroll"></div>
+          </div>
+          <details class="panel">
+            <summary>입력 근거와 모델 한계</summary>
+            <p>
+              ORK의 주 낙하산은 원형 지름 1.3 m, 질량 454 g입니다. 드로그(0.6
+              m)와 주 낙하산은 모두 최고점 전개로 저장돼 있습니다. 여기서는 주
+              낙하산을 파라포일 모델로 대체하며, 드로그가 주 낙하산 비행 중
+              하중을 받지 않는다고 가정합니다.
+            </p>
+            <p>
+              링크 제품은 2줄 파라포일 연입니다. 브라이들 구조와 공력 계수를
+              확인하지 못했으므로 일반적인 좌우 줄 길이차–선회 응답을
+              사용합니다. 원형 낙하산의 직경을 파라포일 면적으로 변환하지
+              않습니다.
+            </p>
+            <p>
+              목표 추종 PD는 GPS 위치·지상속도, 추정 방위·자이로 선회율과 센서
+              유효 상태를 입력받는 시뮬레이션용 코드입니다. 기압 고도는 유효성
+              검사에 사용하며 최종 접근 유도에는 아직 사용하지 않습니다. 센서
+              시간초과 시 중립 복귀는 시험용 정책입니다. 원본 프로젝트의 실제
+              비행 펌웨어에는 조향 알고리즘이 아직 없으며, 이 화면은 보드로
+              명령을 보내지 않습니다.
+            </p>
+            <p>
+              바람은 평균 + 고도별 변화 + 재현 가능한 확률 돌풍이며, 관성항을
+              켜면 변화하는 바람에 대한 공기상대 속도·진행 방향 반응을
+              계산합니다. 회수 기체 방위는 지연 근사입니다. 캐노피 국부
+              유체·변형 하중, 원시 IMU 융합은 포함하지 않습니다. 목표 방위
+              PD만으로 정확한 착지를 보장하지 않으며, 목표 근처를 선회하다
+              착지할 수 있습니다.
+            </p>
+            <p>
+              전개 충격·팽창·진자 운동·실속·접힘·드럼 다층 감김·전원 전류·모터
+              역구동은 모델에 포함되지 않습니다. 선회 계수는 음수로도 설정할 수
+              있어 실제 연결 방향을 반영할 수 있습니다.
+            </p>
+            <p>
+              <a
+                href="https://www.amazon.com/dp/B00VW7MYV8"
+                target="_blank"
+                rel="noreferrer"
+                >사용자 제공 제품</a
+              >
+              ·
+              <a
+                href="https://guidedparafoils.org/wp-content/uploads/2019/06/Adaptive_Glide_Slope.pdf"
+                target="_blank"
+                rel="noreferrer"
+                >선회 응답 모델 참고 연구</a
+              >
+            </p>
+            <pre id="source-details"></pre>
+          </details>
+          <div class="export">
+            <button type="button" id="mission-csv">전체 미션 CSV</button
+            ><button type="button" id="csv">회수 궤적 CSV 저장</button
+            ><button type="button" id="control-csv">제어 주기 로그 CSV</button
+            ><button type="button" id="json">전체 결과 JSON 저장</button
+            ><button type="button" id="config-download">설정 저장</button
+            ><label class="file-button"
+              >설정 불러오기<input
+                type="file"
+                accept=".json"
+                id="config-upload"
+            /></label>
+          </div>
+        </section>
+      </div>
+    </main>
+    <footer>
+      TUSI AVIONICS & RECOVERY
+      <span>제공 파일 기반 · 보정 가능한 축약 물리 모델</span>
+    </footer>
+    <script type="importmap">
+      { "imports": { "three": "/vendor/three.module.js" } }
+    </script>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

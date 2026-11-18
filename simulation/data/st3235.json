@@ -1,0 +1,38 @@
+{
+  "model": "Waveshare ST3235",
+  "confirmed_by_user": true,
+  "reference_voltage_v": 12,
+  "actual_supply_voltage_v": null,
+  "stall_torque_kgf_cm": 30,
+  "stall_torque_nm": 2.941995,
+  "no_load_speed_rpm": 45,
+  "no_load_speed_deg_s": 270,
+  "published_time_per_60_deg_s": 0.222,
+  "position_counts_per_revolution": 4096,
+  "position_count_range": [
+    0,
+    4095
+  ],
+  "position_resolution_deg": 0.087890625,
+  "interface": "TTL serial bus",
+  "default_baudrate": 1000000,
+  "mass_kg": 0.0705,
+  "locked_rotor_current_a": 2.7,
+  "sources": [
+    "https://www.waveshare.com/product/accessories/st3235-servo.htm",
+    "https://www.waveshare.com/wiki/ST3235_Servo"
+  ],
+  "checked_on": "2026-11-18",
+  "notes": [
+    "Manufacturer nominal data at 12 V. Local schematic revision 1.0 dated 2026-09-07 shows 6.5 V UBEC output to both servos. Physical voltage is unmeasured; 6.5 V motor performance is unknown. No automatic voltage scaling.",
+    "270 deg/s uses the published 45 rpm; 0.222 s per 60 degrees is rounded.",
+    "Stall torque is not continuous operating torque. Linear torque-speed behavior remains an approximation.",
+    "Product specification table gives 6-12 V; wiki gives 6-12.6 V. This preset uses their shared 12 V performance point.",
+    "Model simulates position control only; encoder quantization, serial timing and built-in acceleration are not simulated.",
+    "270 degree winding travel is an unconfirmed rig limit, not the ST3235 hardware angle limit. Continuous and multi-turn modes require a separate model.",
+    "Servo mass is not added to the ORK recovery mass; controller mass may already include the servos.",
+    "Schematic labels control nets PWM1/PWM2; ST3235 requires a TTL serial bus. Interface implementation/revision needs reconciliation."
+  ],
+  "design_supply_voltage_v": 6.5,
+  "design_voltage_source": "hardware/power_servo_schematic.png"
+}

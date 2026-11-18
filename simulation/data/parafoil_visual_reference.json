@@ -1,0 +1,23 @@
+{
+  "asin": "B00VW7MYV8",
+  "user_url": "https://www.amazon.com/dp/B00VW7MYV8",
+  "product": "HENGDA KITE 2.5m dual-line soft stunt parafoil, red listing variant",
+  "image_url": "https://images-na.ssl-images-amazon.com/images/I/61uHHe8CnZL.jpg",
+  "image_discovery_page": "https://www.nellisauction.com/p/HENGDA-KITE-2-5m-Dual-Line-Stunt-Parafoil-Kites-Soft-Stunt-Kite/68238117",
+  "image_basis": "Amazon-hosted photograph linked by a matching product-name/red-variant auction listing; direct user Amazon page returned unavailable. Product identity cross-checked with ASIN/UPC listings; current Amazon variant was not independently opened.",
+  "identity_crosscheck": "https://cayman.desertcart.com/products/22791772-2-5m-dual-line-kites-adults-soft-stunt-parafoil-kite",
+  "upc": "701722912076",
+  "visual_span_m": 2.5,
+  "visual_chord_m": 0.85,
+  "visual_dimensions_basis": "Nominal 2.5m size from product naming; 0.85m chord from matching UPC seller listing, not a measured or manufacturer-certified dimension.",
+  "dimension_crosscheck": "https://www.ebay.com/itm/227470414862",
+  "observed": "Arched ram-air canopy, red leading section with open cells, dark band and pale aft panels, branching bridle converging to two control lines. Geometry and visible cell count approximated from a perspective photo.",
+  "not_confirmed": [
+    "projected aerodynamic area",
+    "CL/CD",
+    "bridle dimensions and rocket attachment",
+    "turn gain versus differential line travel",
+    "installed product color variant"
+  ],
+  "photo_sha256": "5174ed931c8ecc354cc51bfb793edc5301f8b07116fa9a8e327e5bbc7ab91bc5"
+}

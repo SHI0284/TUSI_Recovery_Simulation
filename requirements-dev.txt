@@ -1,0 +1,2 @@
+# Optional: code formatting only. Runtime uses the Python standard library.
+black==25.1.0

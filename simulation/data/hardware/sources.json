@@ -1,0 +1,57 @@
+{
+  "checked_on": "2026-11-18",
+  "files": [
+    {
+      "file": "controller.SLDPRT",
+      "original_name": "김유찬_낙하산 제어장치.SLDPRT",
+      "source_url": "https://drive.google.com/file/d/1w1W04jyVhhGJaVmgWr4r0C6e3JWkNmkx/view",
+      "sha256": "3a7110b1feab20bce1db16de0e647b488752e3bcebb2f58c51b6e4b57e22f41f"
+    },
+    {
+      "file": "assembly.SLDASM",
+      "original_name": "어셈블리1.SLDASM",
+      "source_url": "https://drive.google.com/file/d/1gl76DZ_hKZkna5AZJ_7Y6BDdZAl2pWUZ/view",
+      "sha256": "ecb276e37153c0dacaa0e226a3932420bede20a53b2df4832bf5df9cd65b393c"
+    },
+    {
+      "file": "part1.SLDPRT",
+      "original_name": "파트1.SLDPRT",
+      "source_url": "https://drive.google.com/file/d/1OnDDo8ape218cbz2ocHe22vqC6IPw27R/view",
+      "sha256": "6ac5eb889356ffb34c9b499e999cead703ae1ca806c116084c4974365baf3787"
+    },
+    {
+      "file": "part2.SLDPRT",
+      "original_name": "파트2.SLDPRT",
+      "source_url": "https://drive.google.com/file/d/1-muY2YvDIpUsr5T1LWv7bhaxr-qaFqH1/view",
+      "sha256": "7bed8c21ba99333547f214c063094a7ac82cd8f653971dafb7aaa765295f48fa"
+    },
+    {
+      "file": "part3.SLDPRT",
+      "original_name": "파트3.SLDPRT",
+      "source_url": "https://drive.google.com/file/d/1-TSEKhXe7LqzC55YDNLr4sXYSIWUH-pV/view",
+      "sha256": "5662e1998b75e987ff3da7364e8964dc120ddf8025cb7a5c240b5e1cdb79d569"
+    },
+    {
+      "file": "power_servo_schematic.png",
+      "original_filename": "KakaoTalk_20261010_185955240.png",
+      "sha256": "9785c1bc4c284abf82b5b6c8d99d765eaa6e97e0171e530e091c2f2106166d0d"
+    }
+  ],
+  "findings": {
+    "schematic_date": "2026-09-07",
+    "schematic_revision": "1.0",
+    "battery_label": "LIPO_2S_2000MAH / 8V4",
+    "ubec_output_label": "6.5V_10A",
+    "servo_power_net": "6.5V_10A",
+    "servo_signal_nets": [
+      "PWM1",
+      "PWM2"
+    ],
+    "servo_design_supply_voltage_v": 6.5,
+    "bench_voltage_measured": false,
+    "drum_diameter_m": null,
+    "cad_inspection": "Controller saved preview shows the frame, motor mounts and upper guides; winding drum not positively identified. Other assembly/part previews show propulsion motor components. No drum dimension inferred from guide holes or outer frame.",
+    "cad_reader": "https://github.com/KenM76/swformat",
+    "reader_scope": "Read-only stream extraction and saved previews; no SolidWorks rebuild or exact dimensional validation."
+  }
+}

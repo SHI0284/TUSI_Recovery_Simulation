@@ -1,0 +1,3 @@
+# Preserve original input hashes and third-party source bytes on every platform.
+simulation/data/** -text -whitespace
+simulation/web/vendor/** -text -whitespace

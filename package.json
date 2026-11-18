@@ -1,0 +1,12 @@
+{
+  "name": "tusi-recovery-simulation",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "format": "prettier --write 'simulation/web/*.{js,html,css}' 'simulation/web/ui/*.js'",
+    "format:check": "prettier --check 'simulation/web/*.{js,html,css}' 'simulation/web/ui/*.js'"
+  },
+  "devDependencies": {
+    "prettier": "3.6.2"
+  }
+}

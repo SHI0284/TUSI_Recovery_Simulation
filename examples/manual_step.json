@@ -1,0 +1,11 @@
+{
+  "mode": "manual",
+  "gust_std_mps": 0,
+  "wind_east_mps": 0,
+  "wind_north_mps": 0,
+  "wind_shear_east_mps_100m": 0,
+  "left_command_deg": 0,
+  "right_command_deg": 180,
+  "command_start_s": 2,
+  "command_end_s": 12
+}
